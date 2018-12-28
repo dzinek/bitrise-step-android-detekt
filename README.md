@@ -1,6 +1,6 @@
 # Android Detekt
 
-This step runs detekt gradle task on your project.
+This step runs detekt gradle task on your project, using configuration from your Gradle files.
 
 
 ## How to use this Step
