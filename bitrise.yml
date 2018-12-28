@@ -10,6 +10,7 @@ app:
   - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
   - MONO_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-testing.git
 
+
 workflows:
   test:
     title: Test simple android project & mono repo projects
@@ -130,6 +131,21 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
+
+  dep-update:
+    title: Dep update
+    description: |
+      Used for updating bitrise dependencies with dep
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library
