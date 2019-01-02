@@ -9,7 +9,6 @@ import (
 
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-steplib/bitrise-step-android-unit-test/cache"
 	"github.com/bitrise-tools/go-android/gradle"
 	"github.com/bitrise-tools/go-steputils/stepconf"
@@ -20,7 +19,6 @@ import (
 type Config struct {
 	ProjectLocation   string `env:"project_location,dir"`
 	ReportPathPattern string `env:"report_path_pattern"`
-	Variant           string `env:"variant"`
 	Module            string `env:"module"`
 	Arguments         string `env:"arguments"`
 	CacheLevel        string `env:"cache_level,opt[none,only_deps,all]"`
@@ -46,34 +44,6 @@ func getArtifacts(gradleProject gradle.Project, started time.Time, pattern strin
 	return
 }
 
-func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle.Variants, error) {
-	// if module set: drop all the other modules
-	if module != "" {
-		v, ok := variantsMap[module]
-		if !ok {
-			return nil, fmt.Errorf("module not found: %s", module)
-		}
-		variantsMap = gradle.Variants{module: v}
-	}
-	// if variant not set: use all variants
-	if variant == "" {
-		return variantsMap, nil
-	}
-	filterVariants := gradle.Variants{}
-	for m, variants := range variantsMap {
-		for _, v := range variants {
-			if strings.ToLower(v) == strings.ToLower(variant) {
-				filterVariants[m] = append(filterVariants[m], v)
-			}
-		}
-	}
-	if len(filterVariants) == 0 {
-		return nil, fmt.Errorf("variant: %s not found in any module", variant)
-	}
-
-	return filterVariants, nil
-}
-
 func failf(f string, args ...interface{}) {
 	log.Errorf(f, args...)
 	os.Exit(1)
@@ -87,31 +57,6 @@ func runDetektTask(config Config) error {
 
 	detektTask := gradleProject.GetTask("detekt")
 
-	log.Infof("Variants:")
-	fmt.Println()
-
-	variants, err := detektTask.GetVariants()
-	if err != nil {
-		return fmt.Errorf("Failed to fetch variants, error: %s", err)
-	}
-
-	filterVariants, err := filterVariants(config.Module, config.Variant, variants)
-	if err != nil {
-		failf("Failed to find buildable variants, error: %s", err)
-	}
-
-	for module, variants := range variants {
-		log.Printf("%s:", module)
-		for _, variant := range variants {
-			if sliceutil.IsStringInSlice(variant, filterVariants[module]) {
-				log.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
-				continue
-			}
-			log.Printf("- %s", strings.TrimSuffix(variant, "UnitTest"))
-		}
-	}
-	fmt.Println()
-
 	started := time.Now()
 
 	args, err := shellquote.Split(config.Arguments)
@@ -120,10 +65,13 @@ func runDetektTask(config Config) error {
 	}
 
 	log.Infof("Run detekt:")
-	detektCommand := detektTask.GetCommand(filterVariants, args...)
 
+	emptyVariants := gradle.Variants{}
+	emptyVariants[config.Module] = append(emptyVariants[config.Module], "")
+
+	detektCommand := detektTask.GetCommand(emptyVariants, args...)
 	fmt.Println()
-	log.Donef("%s" + detektCommand.PrintableCommandArgs())
+	log.Donef("Printable command args: %s" + detektCommand.PrintableCommandArgs())
 	fmt.Println()
 
 	taskError := detektCommand.Run()

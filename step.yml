@@ -50,14 +50,6 @@ inputs:
       description: |
         Set the module that you want to run detekt. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
       is_required: false
-  - variant: ""
-    opts:
-      title: Variant
-      summary: |
-        Set the variant that you want to run detekt. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
-      description: |
-        Set the variant that you want to run detekt. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
-      is_required: false
   - report_path_pattern: "*/build/reports/detekt/detekt*.html"
     opts:
       category: Options

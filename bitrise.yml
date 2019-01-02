@@ -7,22 +7,24 @@ app:
   - BITRISE_STEP_VERSION: "0.0.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/dzinek/bitrise-step-android-detekt.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
-  - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
-  - MONO_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-testing.git
+  - TEST_REPO_GIT_CLONE_URL: https://github.com/dzinek/android-testing.git
+  - PROJECT_PATH: unit/BasicSample-kotlinAppDetektGradle4.9/
 
 
 workflows:
   test:
-    title: Test simple android project & mono repo projects
+    title: Test simple android Kotlin project with Detekt
     before_run:
     - audit-this-step
     - go-tests
     after_run:
-    - simple-and-mono-repo-in-src-dir
-    - simple-and-mono-repo-in-root-tmp-dir
+    - test-repo-in-src-dir
+    - test-repo-in-src-dir-with-module
+    - test-repo-in-root-tmp-dir
+    - test-repo-in-root-tmp-dir-with-module
 
-  simple-and-mono-repo-in-src-dir:
-    title: Test simple android project & mono repo projects in source dir
+  test-repo-in-src-dir:
+    title: Test simple android Kotlin project with Detekt in source dir
     steps:
     - script:
         inputs:
@@ -39,39 +41,54 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            git clone $SIMPLE_REPO_GIT_CLONE_URL .
+            git clone $TEST_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/$PROJECT_PATH
+        run_if: true
+        inputs:
+        - path: ./$PROJECT_PATH
+        - is_create_path: true
     - install-missing-android-tools:
         inputs:
         - gradlew_path: ./gradlew
     - path::./:
-        title: Test simple android project
+        title: Test repo with no arguments
+
+  test-repo-in-src-dir-with-module:
+    title: Test simple android Kotlin project with Detekt in source dir with module
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf _tmp
     - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo
+        title: cd $BITRISE_SOURCE_DIR/_tmp
         run_if: true
         inputs:
-        - path: ./mono_repo
+        - path: ./_tmp
         - is_create_path: true
     - script:
         inputs:
         - content: |
             #!/bin/bash
-            git clone $MONO_REPO_GIT_CLONE_URL .
+            git clone $TEST_REPO_GIT_CLONE_URL .
     - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
+        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/$PROJECT_PATH
         run_if: true
         inputs:
-        - path: ./ui/espresso/IdlingResourceSample
+        - path: ./$PROJECT_PATH
         - is_create_path: true
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
     - path::./:
-        title: Test monorepo
-    - path::./:
-        title: Test monorepo with module and variant set
+        title: Test repo with module set
         inputs:
         - module: app
-        - variant: Debug
 
-  simple-and-mono-repo-in-root-tmp-dir:
-    title: Test simple android project & mono repo projects in /tmp dir
+  test-repo-in-root-tmp-dir:
+    title: Test simple android Kotlin project with Detekt in /tmp dir
     steps:
     - script:
         inputs:
@@ -88,42 +105,51 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            git clone $SIMPLE_REPO_GIT_CLONE_URL .
+            git clone $TEST_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd /tmp/_tmp/$PROJECT_PATH
+        run_if: true
+        inputs:
+        - path: ./$PROJECT_PATH
+        - is_create_path: true
     - install-missing-android-tools:
         inputs:
         - gradlew_path: ./gradlew
     - path::./:
-        title: Test simple repo
+        title: Test repo in tmp
+
+  test-repo-in-root-tmp-dir-with-module:
+    title: Test simple android Kotlin project with Detekt in /tmp dir with module
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf /tmp/_tmp2
     - change-workdir:
-        title: cd /tmp
+        title: cd /tmp/_tmp2
         run_if: true
         inputs:
-        - path: /tmp
+        - path: /tmp/_tmp2
         - is_create_path: true
     - script:
         inputs:
         - content: |
             #!/bin/bash
-            rm -rf /tmp/_tmp
+            git clone $TEST_REPO_GIT_CLONE_URL .
     - change-workdir:
-        title: cd /tmp/_tmp
+        title: cd /tmp/_tmp2/$PROJECT_PATH
         run_if: true
         inputs:
-        - path: /tmp/_tmp
+        - path: ./$PROJECT_PATH
         - is_create_path: true
-    - script:
+    - install-missing-android-tools:
         inputs:
-        - content: |
-            #!/bin/bash
-            git clone $MONO_REPO_GIT_CLONE_URL .
-    - change-workdir:
-        title: cd /tmp/ui/espresso/IdlingResourceSample
-        run_if: true
-        inputs:
-        - path: ./ui/espresso/IdlingResourceSample
-        - is_create_path: true
+        - gradlew_path: ./gradlew
     - path::./:
-        title: Test monorepo
+        title: Test repo in tmp with module set
+        inputs:
+        - module: app
 
   go-tests:
     steps:
