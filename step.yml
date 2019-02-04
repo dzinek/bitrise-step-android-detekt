@@ -23,12 +23,8 @@ is_skippable: false
 
 deps:
   brew:
-  - name: git
-  - name: wget
   apt_get:
   - name: git
-  - name: wget
-
 
 toolkit:
   go:
