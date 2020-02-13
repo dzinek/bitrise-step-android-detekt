@@ -10,8 +10,8 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-steplib/bitrise-step-android-unit-test/cache"
-	"github.com/bitrise-tools/go-android/gradle"
-	"github.com/bitrise-tools/go-steputils/stepconf"
+	"github.com/bitrise-io/go-android/gradle"
+	"github.com/bitrise-io/go-steputils/stepconf"
 	shellquote "github.com/kballard/go-shellquote"
 )
 
