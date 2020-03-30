@@ -9,6 +9,7 @@ app:
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
   - TEST_REPO_GIT_CLONE_URL: https://github.com/dzinek/android-testing.git
   - PROJECT_PATH: unit/BasicSample-kotlinAppDetektGradle4.9/
+  - PROJECT_KTS_PATH: unit/BasicSample-kotlinAppDetektGradle4.9KotlinDSL/
 
 
 workflows:
@@ -22,6 +23,10 @@ workflows:
     - test-repo-in-src-dir-with-module
     - test-repo-in-root-tmp-dir
     - test-repo-in-root-tmp-dir-with-module
+    - test-repo-kts-in-src-dir
+    - test-repo-kts-in-src-dir-with-module
+    - test-repo-kts-in-root-tmp-dir
+    - test-repo-kts-in-root-tmp-dir-with-module
 
   test-repo-in-src-dir:
     title: Test simple android Kotlin project with Detekt in source dir
@@ -142,6 +147,134 @@ workflows:
         run_if: true
         inputs:
         - path: ./$PROJECT_PATH
+        - is_create_path: true
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
+    - path::./:
+        title: Test repo in tmp with module set
+        inputs:
+        - module: app
+
+  test-repo-kts-in-src-dir:
+    title: Test simple android Kotlin project with Kotlin DSL and Detekt in source dir
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $TEST_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/$PROJECT_KTS_PATH
+        run_if: true
+        inputs:
+        - path: ./$PROJECT_KTS_PATH
+        - is_create_path: true
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
+    - path::./:
+        title: Test repo with no arguments
+
+  test-repo-kts-in-src-dir-with-module:
+    title: Test simple android Kotlin project with Detekt in source dir with module
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $TEST_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/$PROJECT_KTS_PATH
+        run_if: true
+        inputs:
+        - path: ./$PROJECT_KTS_PATH
+        - is_create_path: true
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
+    - path::./:
+        title: Test repo with module set
+        inputs:
+        - module: app
+
+  test-repo-kts-in-root-tmp-dir:
+    title: Test simple android Kotlin project with Detekt in /tmp dir
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf /tmp/_tmp
+    - change-workdir:
+        title: cd /tmp/_tmp
+        run_if: true
+        inputs:
+        - path: /tmp/_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $TEST_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd /tmp/_tmp/$PROJECT_KTS_PATH
+        run_if: true
+        inputs:
+        - path: ./$PROJECT_KTS_PATH
+        - is_create_path: true
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
+    - path::./:
+        title: Test repo in tmp
+
+  test-repo-kts-in-root-tmp-dir-with-module:
+    title: Test simple android Kotlin project with Detekt in /tmp dir with module
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf /tmp/_tmp2
+    - change-workdir:
+        title: cd /tmp/_tmp2
+        run_if: true
+        inputs:
+        - path: /tmp/_tmp2
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $TEST_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd /tmp/_tmp2/$PROJECT_KTS_PATH
+        run_if: true
+        inputs:
+        - path: ./$PROJECT_KTS_PATH
         - is_create_path: true
     - install-missing-android-tools:
         inputs:
